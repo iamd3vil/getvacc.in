@@ -22,7 +22,7 @@ impl Notifier {
     }
 
     pub async fn start_loop(&self) -> Result<(), Box<dyn Error>> {
-        let mut interval = time::interval(time::Duration::from_secs(5 * 60));
+        let mut interval = time::interval(time::Duration::from_secs(1 * 60));
         loop {
             interval.tick().await;
             // Get all pincodes

@@ -15,7 +15,7 @@ struct SubscribeRequest {
     token: String,
 }
 
-#[post("/subscribe")]
+#[post("/api/v1/subscribe")]
 async fn subscribe(
     req: web::Json<SubscribeRequest>,
     db: web::Data<Pool<Sqlite>>,

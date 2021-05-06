@@ -35,7 +35,7 @@ async fn main() -> std::io::Result<()> {
             .data(db_pool.clone())
             .service(subscribe_handler::subscribe)
     })
-    .bind("127.0.0.1:8080")?
+    .bind("127.0.0.1:3030")?
     .run()
     .await
 }
