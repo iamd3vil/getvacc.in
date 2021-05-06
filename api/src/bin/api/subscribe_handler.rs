@@ -1,6 +1,6 @@
 use actix_web::{post, web, HttpResponse, Responder};
 use serde::{Deserialize, Serialize};
-use sqlx::{sqlite::SqliteRow, Pool, Row, Sqlite};
+use sqlx::{Pool, Sqlite};
 
 #[derive(Debug, Serialize)]
 struct SubscribeResponse {
@@ -21,8 +21,9 @@ async fn subscribe(
     db: web::Data<Pool<Sqlite>>,
 ) -> impl Responder {
     // Check if the sub already exists
-    let res = get_sub(&db, &req.token).await;
+    let res = get_sub(&db, &req).await;
     if res.is_ok() {
+        println!("Sub already exists");
         let resp = SubscribeResponse {
             age_limit: req.age_limit,
             pincode: req.pincode.clone(),
@@ -53,22 +54,15 @@ async fn subscribe(
     }
 }
 
-async fn get_sub(
+async fn get_sub<'a>(
     db: &web::Data<Pool<Sqlite>>,
-    reg_token: &str,
-) -> Result<SubscribeRequest, sqlx::Error> {
+    sub: &'a SubscribeRequest
+) -> Result<&'a SubscribeRequest, sqlx::Error> {
     let mut conn = db.acquire().await?;
-    let mut sub = SubscribeRequest {
-        pincode: "".to_string(),
-        age_limit: 0,
-        token: reg_token.to_string(),
-    };
-    sqlx::query("SELECT * FROM subs WHERE reg_token = ?")
-        .bind(reg_token)
-        .map(|row: SqliteRow| {
-            sub.pincode = row.get("pincode");
-            sub.age_limit = row.get("age_limit")
-        })
+    sqlx::query("SELECT * FROM subs WHERE pincode = ? and age_limit=? and reg_token = ?")
+        .bind(&sub.pincode)
+        .bind(&sub.age_limit)
+        .bind(&sub.token)
         .fetch_one(&mut conn)
         .await?;
     Ok(sub)

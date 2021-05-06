@@ -2,7 +2,7 @@
 CREATE TABLE subs (
 	pincode TEXT NOT NULL,
 	age_limit INTEGER NOT NULL,
-	reg_token TEXT NOT NULL UNIQUE
+	reg_token TEXT NOT NULL
 );
 
 CREATE INDEX idx_pincode
@@ -12,4 +12,4 @@ CREATE INDEX idx_age_limit
 ON subs(age_limit);
 
 CREATE UNIQUE INDEX idx_reg_token
-ON subs(reg_token);
+ON subs(pincode, age_limit, reg_token);
