@@ -1,6 +1,6 @@
 <script>
-	import Description from './Description.svelte';
-	import SubscribeForm from './SubscribeForm.svelte';
+	import Description from './components/Description.svelte';
+	import SubscribeForm from './components/SubscribeForm.svelte';
 </script>
 
 <section class="container">

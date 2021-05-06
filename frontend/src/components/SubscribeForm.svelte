@@ -1,8 +1,8 @@
 <script>
     import firebase from "firebase/app";
     import "firebase/messaging";
-    import axios from 'axios';
     import Toastify from 'toastify-js';
+    import sendSub from '../api.js';
 
     var firebaseConfig = {
         apiKey: "AIzaSyAqwahqZV8qMTkixTgfz5Z32HOOnDeKzuI",
@@ -48,20 +48,6 @@
             console.log('An error occurred while retrieving token. ', err)
         })
         console.log(pincode, age);
-    }
-
-    async function sendSub(pincode, age, token) {
-        try {
-            const response = await axios.post('/api/v1/subscribe', {
-                pincode: pincode,
-                age_limit: age,
-                token: token,
-            })
-
-            console.log('response: ', response)
-        } catch (error) {
-            console.log('Error sending API call: ', error)
-        }
     }
 </script>
 
