@@ -18,7 +18,7 @@ impl Notifier {
         Self {
             db: Arc::new(db),
             fcm_client: Arc::new(fcm_client),
-            api_key: api_key,
+            api_key,
         }
     }
 
@@ -84,7 +84,7 @@ async fn check_slots(db: &Pool<Sqlite>, fcm_client: &fcm::Client, api_key: Strin
             av
         })
         .collect();
-    if available_centres.len() > 0 {
+    if !available_centres.is_empty() {
         let res = send_notification(
             db,
             fcm_client,
@@ -141,7 +141,7 @@ async fn send_notification(
     Ok(())
 }
 
-fn make_notification(centres: &Vec<&vaxnotify::Center>, sub: &Sub) -> String {
+fn make_notification(centres: &[&vaxnotify::Center], sub: &Sub) -> String {
     format!(
         "{} slots open for {} age. Please check cowin website.",
         centres.len(),

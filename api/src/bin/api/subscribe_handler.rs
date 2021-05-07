@@ -30,7 +30,7 @@ async fn subscribe(
     if res.is_ok() {
         println!("Sub already exists");
         let resp = SubscribeResponse {
-            age_limit: age_limit,
+            age_limit,
             pincode: req.pincode.clone(),
         };
         return HttpResponse::Ok()
@@ -48,7 +48,7 @@ async fn subscribe(
     match r {
         Ok(_) => {
             let resp = SubscribeResponse {
-                age_limit: age_limit,
+                age_limit,
                 pincode: req.pincode.clone(),
             };
             HttpResponse::Ok()
@@ -59,10 +59,10 @@ async fn subscribe(
     }
 }
 
-async fn get_sub<'a>(
+async fn get_sub(
     db: &web::Data<Pool<Sqlite>>,
-    sub: &'a SubscribeRequest,
-) -> Result<&'a SubscribeRequest, sqlx::Error> {
+    sub: &SubscribeRequest,
+) -> Result<(), sqlx::Error> {
     let mut conn = db.acquire().await?;
     sqlx::query("SELECT * FROM subs WHERE pincode = ? and age_limit=? and reg_token = ?")
         .bind(&sub.pincode)
@@ -70,13 +70,13 @@ async fn get_sub<'a>(
         .bind(&sub.token)
         .fetch_one(&mut conn)
         .await?;
-    Ok(sub)
+    Ok(())
 }
 
 fn get_age_limit(age: u32) -> u32 {
     match age {
         age if age >= 45 => 45,
-        age if age < 45 && age >= 18 => 18,
+        age if (18..45).contains(&age) => 18,
         _ => 0,
     }
 }
