@@ -6,6 +6,8 @@ use std::sync::Arc;
 use tokio::time;
 use vaxnotify::get_centers;
 
+const NOTIF_TITLE: &str = "Alert from getvacc.in";
+
 pub struct Notifier {
     fcm_client: Arc<fcm::Client>,
     db: Arc<Pool<Sqlite>>,
@@ -22,8 +24,9 @@ impl Notifier {
     }
 
     pub async fn start_loop(&self) -> Result<(), Box<dyn Error>> {
-        let mut interval = time::interval(time::Duration::from_secs(1 * 60));
+        let mut interval = time::interval(time::Duration::from_secs(5 * 60));
         loop {
+            println!("Starting notifier loop");
             interval.tick().await;
             // Get all pincodes
             let subs = self.get_all_subs().await?;
@@ -78,10 +81,6 @@ async fn check_slots(db: &Pool<Sqlite>, fcm_client: &fcm::Client, api_key: Strin
         .filter(|c| {
             let mut av = false;
             for ses in &c.sessions {
-                println!(
-                    "Checking session, age limit: {}, {}, capacity: {}",
-                    ses.min_age_limit, sub.age_limit, ses.available_capacity
-                );
                 if ses.min_age_limit <= sub.age_limit && ses.available_capacity > 0 {
                     av = true
                 }
@@ -89,7 +88,6 @@ async fn check_slots(db: &Pool<Sqlite>, fcm_client: &fcm::Client, api_key: Strin
             av
         })
         .collect();
-    println!("Length: {}", available_centres.len());
     if available_centres.len() > 0 {
         let res = send_notification(
             db,
@@ -100,7 +98,11 @@ async fn check_slots(db: &Pool<Sqlite>, fcm_client: &fcm::Client, api_key: Strin
         )
         .await;
         if let Err(e) = res {
-            println!("error while sending notification for sub: {}, {:?}", e.to_string(), sub);
+            println!(
+                "error while sending notification for sub: {}, {:?}",
+                e.to_string(),
+                sub
+            );
         }
     }
 }
@@ -115,13 +117,14 @@ async fn send_notification(
     // Get all tokens for this pincode and send notification.
     let mut tokens: Vec<String> = vec![];
     let mut conn = db.acquire().await?;
-    sqlx::query("SELECT reg_token FROM subs WHERE pincode=?")
+    sqlx::query("SELECT reg_token FROM subs WHERE pincode=? and age_limit=?")
         .bind(&sub.pincode)
+        .bind(&sub.age_limit)
         .map(|row: SqliteRow| tokens.push(row.get("reg_token")))
         .fetch_all(&mut conn)
         .await?;
     let mut fcm_notif = fcm::NotificationBuilder::new();
-    fcm_notif.title("Alert from getvax.in");
+    fcm_notif.title(NOTIF_TITLE);
     fcm_notif.body(&notif);
     let mut builder = fcm::MessageBuilder::new_multi(&api_key, &tokens);
     builder.notification(fcm_notif.finalize());
@@ -144,7 +147,7 @@ async fn send_notification(
 
 fn make_notification(centres: &Vec<&vaxnotify::Center>, sub: &Sub) -> String {
     format!(
-        "{} slots open for {} age. Please check cowin.",
+        "{} slots open for {} age. Please check cowin website.",
         centres.len(),
         sub.age_limit
     )
