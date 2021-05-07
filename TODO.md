@@ -1,0 +1,2 @@
+- [X] Configure FCM in frontend.
+- [ ] Don't send notifications continuously. Add some time gap in between notifications.
