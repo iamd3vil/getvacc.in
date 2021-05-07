@@ -75,12 +75,8 @@ async fn get_sub<'a>(
 
 fn get_age_limit(age: u32) -> u32 {
     match age {
-        age if age >= 45 => {
-            45
-        },
-        age if age < 45 && age >= 18 => {
-            18
-        },
-        _ => 0
+        age if age >= 45 => 45,
+        age if age < 45 && age >= 18 => 18,
+        _ => 0,
     }
 }

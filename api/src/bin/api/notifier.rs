@@ -1,5 +1,4 @@
 use chrono::Local;
-use itertools::Itertools;
 use sqlx::{sqlite::SqliteRow, Pool, Row, Sqlite};
 use std::error::Error;
 use std::sync::Arc;
@@ -32,10 +31,7 @@ impl Notifier {
             let subs = self.get_all_subs().await?;
 
             // Loop over each sub and check if there are any slots available.
-            for sub in subs
-                .iter()
-                .unique_by(|s| format!("{}-{}", s.pincode, s.age_limit))
-            {
+            subs.iter().for_each(|sub| {
                 let sub = sub.clone();
                 let db = self.db.clone();
                 let fcm_client = self.fcm_client.clone();
@@ -43,19 +39,19 @@ impl Notifier {
                 tokio::spawn(async move {
                     check_slots(&db, &fcm_client, api_key, &sub).await;
                 });
-            }
+            });
         }
     }
 
     async fn get_all_subs(&self) -> Result<Vec<Sub>, sqlx::Error> {
         let mut subs: Vec<Sub> = vec![];
         let mut conn = self.db.acquire().await?;
-        sqlx::query("SELECT * FROM subs")
+        sqlx::query("SELECT DISTINCT pincode, age_limit FROM subs")
             .map(|row: SqliteRow| {
                 let sub = Sub {
                     age_limit: row.get("age_limit"),
                     pincode: row.get("pincode"),
-                    token: row.get("reg_token"),
+                    token: String::from(""), // Don't really need token here.
                 };
                 subs.push(sub);
             })
