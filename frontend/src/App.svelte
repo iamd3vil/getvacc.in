@@ -21,16 +21,15 @@
 		<div class="level-left">
 		<div class="level-item">
 			<span class="icon">
-			<i class="fab fa-github"></i>
-			</span> &emsp;
-			<!-- <span class="icon">
-			<i class="fas fa-envelope"></i>
-			</span> -->
+			<a href="https://github.com/iamd3vil/getvacc.in">
+				<i class="fab fa-github"></i>
+			</a>
+			</span>
 		</div>
 		</div>
 		<div class="level-right">
 		<small class="level-item">
-			Made with 🖤 by Sarat Chandra.
+			Made with 🖤 by  <a href="https://twitter.com/iamd3vil">Sarat Chandra</a>.
 		</small>
 		</div>
 	</nav>

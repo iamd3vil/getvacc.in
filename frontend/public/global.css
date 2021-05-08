@@ -4,6 +4,10 @@ body {
     color: hsla(0, 0%, 0%, 0.66);;
 }
 
+a {
+    color: hsl(166, 67%, 51%);
+}
+
 .field:not(:last-child) {
     margin-bottom: 1rem;
 }
