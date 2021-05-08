@@ -8,9 +8,11 @@ use std::env;
 async fn main() -> std::io::Result<()> {
     let db_path = env::var("DATABASE_URL").expect("DATABASE_URL can't be blank");
     let api_key = env::var("FCM_API_KEY").expect("FCM_API_KEY can't be blank");
-    let notify_period = match env::var("NOTIFY_PERIOD_SECS") {
-        Ok(period) => period.parse::<u32>().expect("NOTIFY_PERIOD_SECS has to be an integer"),
-        _ => 1800
+    let notify_period: u32 = match env::var("NOTIFY_PERIOD_SECS") {
+        Ok(period) => period
+            .parse()
+            .expect("NOTIFY_PERIOD_SECS has to be an integer"),
+        _ => 1800,
     };
 
     // Create database

@@ -1,4 +1,4 @@
-use chrono::Local;
+use chrono::{Local, Utc};
 use sqlx::{sqlite::SqliteRow, Pool, Row, Sqlite};
 use std::error::Error;
 use std::sync::Arc;
@@ -20,7 +20,7 @@ impl Notifier {
             db: Arc::new(db),
             fcm_client: Arc::new(fcm_client),
             api_key,
-            period
+            period,
         }
     }
 
@@ -115,15 +115,27 @@ async fn send_notification(
     // Get all tokens for this pincode and send notification.
     let mut tokens: Vec<String> = vec![];
     let mut conn = db.acquire().await?;
-    sqlx::query("SELECT reg_token FROM subs WHERE pincode=? and age_limit=?")
-        .bind(&sub.pincode)
-        .bind(&sub.age_limit)
-        .map(|row: SqliteRow| tokens.push(row.get("reg_token")))
-        .fetch_all(&mut conn)
-        .await?;
+    sqlx::query(
+        "SELECT reg_token, last_notification_at 
+        FROM subs WHERE pincode=? and age_limit=? and ? - last_notification_at >= ?",
+    )
+    .bind(&sub.pincode)
+    .bind(&sub.age_limit)
+    .bind(&Utc::now().timestamp())
+    .bind(7200) // 2 hours
+    .map(|row: SqliteRow| {
+        tokens.push(row.get("reg_token"));
+    })
+    .fetch_all(&mut conn)
+    .await?;
     let mut fcm_notif = fcm::NotificationBuilder::new();
     fcm_notif.title(NOTIF_TITLE);
     fcm_notif.body(&notif);
+
+    if tokens.is_empty() {
+        return Ok(());
+    }
+
     let mut builder = fcm::MessageBuilder::new_multi(&api_key, &tokens);
     builder.notification(fcm_notif.finalize());
     let resp = fcm_client.send(builder.finalize()).await?;
@@ -140,6 +152,7 @@ async fn send_notification(
         }
         _ => {}
     }
+    update_notification_timestamp(db, sub).await?;
     Ok(())
 }
 
@@ -154,4 +167,15 @@ fn make_notification(centres: &[&vaxnotify::Center], sub: &Sub) -> String {
 fn get_date() -> String {
     let now = Local::today();
     now.format("%d-%m-%Y").to_string()
+}
+
+async fn update_notification_timestamp(db: &Pool<Sqlite>, sub: &Sub) -> Result<(), sqlx::Error> {
+    let mut conn = db.acquire().await?;
+    sqlx::query("UPDATE subs SET last_notification_at = ? WHERE pincode=? and age_limit=?")
+        .bind(chrono::Utc::now().timestamp())
+        .bind(&sub.pincode)
+        .bind(&sub.age_limit)
+        .execute(&mut conn)
+        .await?;
+    Ok(())
 }

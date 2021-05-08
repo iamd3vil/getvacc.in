@@ -26,7 +26,7 @@ async fn subscribe(
     }
     let age_limit: u32 = get_age_limit(req.age);
     // Check if the sub already exists
-    let res = get_sub(&db, &req).await;
+    let res = check_sub(&db, &req).await;
     if res.is_ok() {
         println!("Sub already exists");
         let resp = SubscribeResponse {
@@ -59,7 +59,7 @@ async fn subscribe(
     }
 }
 
-async fn get_sub(
+async fn check_sub(
     db: &web::Data<Pool<Sqlite>>,
     sub: &SubscribeRequest,
 ) -> Result<(), sqlx::Error> {
