@@ -1,7 +1,7 @@
 mod notifier;
 mod subscribe_handler;
 use actix_web::{App, HttpServer};
-use sqlx::{migrate::MigrateDatabase, sqlite::SqlitePoolOptions};
+use sqlx::sqlite::SqlitePoolOptions;
 use std::env;
 
 #[actix_web::main]
@@ -15,10 +15,6 @@ async fn main() -> std::io::Result<()> {
         _ => 1800,
     };
 
-    // Create database
-    sqlx::Sqlite::create_database(&db_path)
-        .await
-        .expect("error while creating db");
     let db_pool = SqlitePoolOptions::new()
         .max_connections(300)
         .connect(&db_path)
