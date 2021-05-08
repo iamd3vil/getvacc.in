@@ -723,6 +723,23 @@ dependencies = [
 ]
 
 [[package]]
+name = "getvacc"
+version = "0.1.0"
+dependencies = [
+ "actix-web",
+ "chrono",
+ "derive_more",
+ "env_logger",
+ "fcm",
+ "futures",
+ "reqwest",
+ "serde",
+ "serde_json",
+ "sqlx",
+ "tokio",
+]
+
+[[package]]
 name = "h2"
 version = "0.3.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2067,23 +2084,6 @@ dependencies = [
  "idna",
  "matches",
  "percent-encoding",
-]
-
-[[package]]
-name = "vaxnotify"
-version = "0.1.0"
-dependencies = [
- "actix-web",
- "chrono",
- "derive_more",
- "env_logger",
- "fcm",
- "futures",
- "reqwest",
- "serde",
- "serde_json",
- "sqlx",
- "tokio",
 ]
 
 [[package]]

@@ -3,7 +3,7 @@ use sqlx::{sqlite::SqliteRow, Pool, Row, Sqlite};
 use std::error::Error;
 use std::sync::Arc;
 use tokio::time;
-use vaxnotify::get_centers;
+use getvacc::get_centers;
 
 const NOTIF_TITLE: &str = "Alert from getvacc.in";
 
@@ -73,7 +73,7 @@ struct Sub {
 async fn check_slots(db: &Pool<Sqlite>, fcm_client: &fcm::Client, api_key: String, sub: &Sub) {
     println!("Checking slot for pincode: {}", &sub.pincode);
     let centres = get_centers(&sub.pincode, &get_date()).await.unwrap();
-    let available_centres: Vec<&vaxnotify::Center> = centres
+    let available_centres: Vec<&getvacc::Center> = centres
         .centers
         .iter()
         .filter(|c| {
@@ -156,7 +156,7 @@ async fn send_notification(
     Ok(())
 }
 
-fn make_notification(centres: &[&vaxnotify::Center], sub: &Sub) -> String {
+fn make_notification(centres: &[&getvacc::Center], sub: &Sub) -> String {
     format!(
         "{} slots open for {} age. Please check cowin website.",
         centres.len(),
