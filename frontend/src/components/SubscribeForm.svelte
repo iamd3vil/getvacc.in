@@ -28,26 +28,43 @@
         }).then((current_token) => {
             if (current_token) {
                 sendSub(pincode, age, current_token).then(() => {
-                    is_loading = false
-                    console.log("sent api request")
                     Toastify({
                         text: 'Subscribed Successfully.',
                         duration: 3000,
                         close: true,
                         gravity: 'top',
-                        style: {
-                            background: 'green'
-                        },
                         onClick: function(){}
                     }).showToast();
-                })
+                }).catch(err => {
+                    Toastify({
+                        text: err,
+                        duration: 3000,
+                        close: true,
+                        gravity: 'top',
+                        onClick: function(){}
+                    }).showToast();
+                }) 
             } else {
-                console.log('No registration token available. Request permission to generate one.');
+                Toastify({
+                    text: 'Please allow notifications in the browser to subscribe.',
+                    duration: 3000,
+                    close: true,
+                    gravity: 'top',
+                    onClick: function(){}
+                }).showToast();
             }
+            is_loading = false
         }).catch(err => {
             console.log('An error occurred while retrieving token. ', err)
+            Toastify({
+                text: 'Please allow notifications in the browser',
+                duration: 3000,
+                close: true,
+                gravity: 'top',
+                onClick: function(){}
+            }).showToast();
+            is_loading = false
         })
-        console.log(pincode, age);
     }
 </script>
 

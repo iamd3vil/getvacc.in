@@ -7,9 +7,7 @@ export default async function sendSub(pincode, age, token) {
             age: age,
             token: token,
         })
-
-        console.log('response: ', response)
     } catch (error) {
-        console.log('Error sending API call: ', error)
+        throw 'Something went wrong: Error sending API Call';
     }
 }
