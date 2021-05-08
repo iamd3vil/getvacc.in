@@ -28,7 +28,6 @@ async fn subscribe(
     // Check if the sub already exists
     let res = check_sub(&db, &req).await;
     if res.is_ok() {
-        println!("Sub already exists");
         let resp = SubscribeResponse {
             age_limit,
             pincode: req.pincode.clone(),

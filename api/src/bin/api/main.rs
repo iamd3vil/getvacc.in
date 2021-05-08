@@ -1,5 +1,6 @@
 mod notifier;
 mod subscribe_handler;
+use actix_web::middleware::Logger;
 use actix_web::{App, HttpServer};
 use sqlx::sqlite::SqlitePoolOptions;
 use std::env;
@@ -14,6 +15,9 @@ async fn main() -> std::io::Result<()> {
             .expect("NOTIFY_PERIOD_SECS has to be an integer"),
         _ => 1800,
     };
+    if env::var("RUST_LOG").is_err() {
+        env::set_var("RUST_LOG", "actix_web=info");
+    }
 
     let db_pool = SqlitePoolOptions::new()
         .max_connections(300)
@@ -32,8 +36,11 @@ async fn main() -> std::io::Result<()> {
         }
     });
 
+    env_logger::init();
+
     HttpServer::new(move || {
         App::new()
+            .wrap(Logger::default())
             .data(db_pool.clone())
             .service(subscribe_handler::subscribe)
     })
