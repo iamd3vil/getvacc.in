@@ -1,9 +1,9 @@
 use chrono::{Local, Utc};
+use getvacc::get_centers;
 use sqlx::{sqlite::SqliteRow, Pool, Row, Sqlite};
 use std::error::Error;
 use std::sync::Arc;
 use tokio::time;
-use getvacc::get_centers;
 
 const NOTIF_TITLE: &str = "Alert from getvacc.in";
 
