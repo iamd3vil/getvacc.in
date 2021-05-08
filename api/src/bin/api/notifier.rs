@@ -11,19 +11,21 @@ pub struct Notifier {
     fcm_client: Arc<fcm::Client>,
     db: Arc<Pool<Sqlite>>,
     api_key: String,
+    period: u32,
 }
 
 impl Notifier {
-    pub fn new(db: Pool<Sqlite>, fcm_client: fcm::Client, api_key: String) -> Self {
+    pub fn new(db: Pool<Sqlite>, fcm_client: fcm::Client, api_key: String, period: u32) -> Self {
         Self {
             db: Arc::new(db),
             fcm_client: Arc::new(fcm_client),
             api_key,
+            period
         }
     }
 
     pub async fn start_loop(&self) -> Result<(), Box<dyn Error>> {
-        let mut interval = time::interval(time::Duration::from_secs(5 * 60));
+        let mut interval = time::interval(time::Duration::from_secs(self.period as u64));
         loop {
             println!("Starting notifier loop");
             interval.tick().await;
