@@ -1,3 +1,5 @@
+# Notice: This no longer works now because of the rate limits and stale data of Cowin API.
+
 # Getvacc.in :syringe:
 A website which sends an alert when there is a slot of vaccine is available. This periodically checks CoWin API and sends a web push when a slot is available for a pincode.
 
